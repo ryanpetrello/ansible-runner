@@ -5,6 +5,7 @@ import time
 import json
 import errno
 import signal
+import subprocess
 import shutil
 import codecs
 import collections
@@ -36,6 +37,34 @@ class Runner(object):
         self.rc = None
         self.remove_partials = remove_partials
 
+    def _collect_profiling_data(self, event_data):
+        cgroup_output_dir = self.config.env.get('CGROUP_OUTPUT_DIR', '')
+        if not cgroup_output_dir:
+            return {}
+        task_uuid = event_data['event_data']['task_uuid']
+        debug('Collecting profiling info for uuid {}'.format(task_uuid))
+        partial_path = cgroup_output_dir.decode("utf-8") + '/' + task_uuid  # right encoding?
+
+        data = {}
+        for feature in ('cpu', 'memory', 'pids'):
+            path = '{0}-{1}.json'.format(partial_path, feature)
+            try:
+                with open(path) as f:
+                    lines = []
+                    line = ''
+                    try:
+                        for line in f.readlines():
+                            debug('Added profiling datapoint')
+                            line = line[line.index('{'):line.index('}') + 1]  # remove cruft
+                            line = json.loads(line)
+                            lines.append(line)
+                    except:
+                        debug('Failed to process performance datapoint: {}'.format(line))
+                    data[feature] = lines
+            except FileNotFoundError:
+                debug('Failed to open {}'.format(path))
+        event_data['profiling_data'] = data
+
     def event_callback(self, event_data):
         '''
         Invoked for every Ansible event to collect stdout with the event data and store it for
@@ -57,6 +86,11 @@ class Runner(object):
                     with codecs.open(partial_filename, 'r', encoding='utf-8') as read_file:
                         partial_event_data = json.load(read_file)
                     event_data.update(partial_event_data)
+
+                    event = event_data.get('event', '')
+                    if event == 'runner_on_ok' or event == 'runner_on_failed':
+                        self._collect_profiling_data(event_data)
+
                     if self.remove_partials:
                         os.remove(partial_filename)
                 except IOError:
@@ -133,6 +167,15 @@ class Runner(object):
             for k, v in self.config.env.items()
         }
 
+        # Prepare to collect performance data
+        if self.config.resource_profiling:
+            cgroup_path = '{0}/{1}'.format(self.config.resource_profiling_base_cgroup, self.config.ident)
+            cmd = 'cgcreate -g cpuacct,memory,pids:{}'.format(cgroup_path)
+            rc = subprocess.call(cmd, shell=True)
+            if rc:
+                # Unable to create cgroup, disable profiling
+                self.config.resource_profiling = False
+
         self.status_callback('running')
         child = pexpect.spawn(
             self.config.command[0],
@@ -198,6 +241,10 @@ class Runner(object):
                 f.write(str(data))
         if self.config.directory_isolation_path and self.config.directory_isolation_cleanup:
             shutil.rmtree(self.config.directory_isolation_path)
+        if self.config.resource_profiling:
+            cmd = ['cgdelete', '-g', 'cpuacct,memory,pids:ansible-runner-{}'.format(self.config.ident)]
+            proc = subprocess.Popen(cmd, shell=True)
+            proc.wait()
         if self.finished_callback is not None:
             try:
                 self.finished_callback(self)

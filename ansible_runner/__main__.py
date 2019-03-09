@@ -250,6 +250,12 @@ def main(sys_args=None):
     parser.add_argument("--directory-isolation-base-path", dest='directory_isolation_base_path',
                         help="Copies the project directory to a location in this directory to prevent multiple simultaneous executions from conflicting")
 
+    parser.add_argument("--resource-profiling", dest='resource_profiling', action="store_true",
+                        help="Records resource utilization during playbook execution")
+
+    parser.add_argument("--resource-profiling-base-cgroup", dest='resource_profiling_base_cgroup', default="ansible-runner",
+                        help="Top-level cgroup used to collect information on resource utilization")
+
     parser.add_argument("--limit",
                         help="Matches ansible's ``--limit`` parameter to further constrain the inventory to be used")
 
@@ -322,6 +328,8 @@ def main(sys_args=None):
                                    process_isolation_show_paths=args.process_isolation_show_paths,
                                    process_isolation_ro_paths=args.process_isolation_ro_paths,
                                    directory_isolation_base_path=args.directory_isolation_base_path,
+                                   resource_profiling=args.resource_profiling,
+                                   resource_profiling_base_cgroup=args.resource_profiling_base_cgroup,
                                    limit=args.limit)
                 if args.cmdline:
                     run_options['cmdline'] = args.cmdline

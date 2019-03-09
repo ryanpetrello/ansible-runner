@@ -79,8 +79,8 @@ class RunnerConfig(object):
                  rotate_artifacts=0, host_pattern=None, binary=None, extravars=None, suppress_ansible_output=False,
                  process_isolation=False, process_isolation_executable=None, process_isolation_path=None,
                  process_isolation_hide_paths=None, process_isolation_show_paths=None, process_isolation_ro_paths=None,
-                 tags=None, skip_tags=None, fact_cache_type='jsonfile', fact_cache=None, project_dir=None,
-                 directory_isolation_base_path=None, envvars=None, forks=None):
+                 resource_profiling=False, resource_profiling_base_cgroup='ansible_runner', tags=None, skip_tags=None, fact_cache_type='jsonfile', fact_cache=None,
+                 project_dir=None, directory_isolation_base_path=None, envvars=None, forks=None):
         self.private_data_dir = os.path.abspath(private_data_dir)
         self.ident = ident
         self.json_mode = json_mode
@@ -106,6 +106,8 @@ class RunnerConfig(object):
         self.process_isolation_hide_paths = process_isolation_hide_paths
         self.process_isolation_show_paths = process_isolation_show_paths
         self.process_isolation_ro_paths = process_isolation_ro_paths
+        self.resource_profiling = resource_profiling
+        self.resource_profiling_base_cgroup = resource_profiling_base_cgroup
         self.directory_isolation_path = directory_isolation_base_path
         if not project_dir:
             self.project_dir = os.path.join(self.private_data_dir, 'project')
@@ -180,6 +182,18 @@ class RunnerConfig(object):
             self.env['ANSIBLE_STDOUT_CALLBACK'] = 'minimal'
         else:
             self.env['ANSIBLE_STDOUT_CALLBACK'] = 'awx_display'
+
+            if self.resource_profiling:
+                callback_whitelist = os.environ.get('ANSIBLE_CALLBACK_WHITELIST', '').strip()
+                self.env['ANSIBLE_CALLBACK_WHITELIST'] = callback_whitelist + (',' if len(callback_whitelist) else '') + 'cgroup_perf_recap'
+                self.env['CGROUP_CONTROL_GROUP'] = '{}/{}'.format(self.resource_profiling_base_cgroup, self.ident)
+                self.env['CGROUP_OUTPUT_DIR'] = self.private_data_dir + '/profiling_data'
+                self.env['CGROUP_FILE_NAME_FORMAT'] = '%(task_uuid)s-%(feature)s.%(ext)s'
+                self.env['CGROUP_OUTPUT_FORMAT'] = 'json'
+                self.env['CGROUP_CPU_POLL_INTERVAL'] = '0.25'  # TODO
+                self.env['CGROUP_FILE_PER_TASK'] = 'True'
+                self.env['CGROUP_WRITE_FILES'] = 'True'
+                self.env['CGROUP_DISPLAY_RECAP'] = 'False'  # TODO
         self.env['ANSIBLE_RETRY_FILES_ENABLED'] = 'False'
         self.env['ANSIBLE_HOST_KEY_CHECKING'] = 'False'
         self.env['AWX_ISOLATED_DATA_DIR'] = self.artifact_dir
@@ -190,6 +204,9 @@ class RunnerConfig(object):
 
         if self.process_isolation:
             self.command = self.wrap_args_with_process_isolation(self.command)
+
+        if self.resource_profiling:
+            self.command = self.wrap_args_with_cgexec(self.command)
 
         if self.fact_cache_type == 'jsonfile':
             self.env['ANSIBLE_CACHE_PLUGIN'] = 'jsonfile'
@@ -371,6 +388,15 @@ class RunnerConfig(object):
         os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
         atexit.register(shutil.rmtree, path)
         return path
+
+    def wrap_args_with_cgexec(self, args):
+        '''
+        Wrap existing command line with cgexec in order to profile resource usage
+        '''
+        # TODO: Should only wrap if `self.execution_mode == ExecutionMode.ANSIBLE_PLAYBOOK` (see example below)
+        new_args = ['cgexec', '--sticky', '-g', 'cpuacct,memory,pids:{}/{}'.format(self.resource_profiling_base_cgroup, self.ident)]  # Is sticky needed?
+        new_args.extend(args)
+        return new_args
 
     def wrap_args_with_process_isolation(self, args):
         '''
