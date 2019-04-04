@@ -246,7 +246,7 @@ class Runner(object):
         if self.config.directory_isolation_path and self.config.directory_isolation_cleanup:
             shutil.rmtree(self.config.directory_isolation_path)
         if self.config.resource_profiling:
-            cmd = ['cgdelete', '-g', 'cpuacct,memory,pids:ansible-runner-{}'.format(self.config.ident)]
+            cmd = ['cgdelete', '-g', 'cpuacct,memory,pids:{}'.format(cgroup_path)]
             proc = Popen(cmd, stout=PIPE, stderr=PIPE, shell=True)
             _, stderr = proc.communicate()
             if proc.returncode:
