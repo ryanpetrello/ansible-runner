@@ -87,7 +87,7 @@ class Runner(object):
                     event_data.update(partial_event_data)
 
                     event = event_data.get('event', '')
-                    if event == 'runner_on_ok' or event == 'runner_on_failed':
+                    if self.config.resource_profiling and (event == 'runner_on_ok' or event == 'runner_on_failed':
                         self._collect_profiling_data(event_data)
 
                     if self.remove_partials:
