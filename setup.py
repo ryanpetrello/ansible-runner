@@ -10,7 +10,7 @@ with open('README.md', 'r') as f:
 
 setup(
     name="ansible-runner",
-    version="1.3.1",
+    version="1.5.0",  # .. so I can tell if SLOWYO installed correct version
     author='Red Hat Ansible',
     url="https://github.com/ansible/ansible-runner",
     license='Apache',
