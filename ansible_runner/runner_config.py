@@ -395,7 +395,7 @@ class RunnerConfig(object):
         '''
         Wrap existing command line with cgexec in order to profile resource usage
         '''
-        new_args = ['cgexec', '--sticky', '-g', 'cpuacct,memory,pids:{}/{}'.format(self.resource_profiling_base_cgroup, self.ident)]  # Is sticky needed?
+        new_args = ['cgexec', '--sticky', '-g', 'cpuacct,memory,pids:{}/{}'.format(self.resource_profiling_base_cgroup, self.ident)]
         new_args.extend(args)
         return new_args
 
