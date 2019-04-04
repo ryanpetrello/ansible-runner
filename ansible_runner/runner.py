@@ -54,11 +54,10 @@ class Runner(object):
                     line = ''
                     try:
                         for line in f.readlines():
-                            debug('Added profiling datapoint')
                             line = line[line.index('{'):line.index('}') + 1]  # remove cruft
                             line = json.loads(line)
                             lines.append(line)
-                    except:
+                    except ValueError, json.JSONDecodeError:
                         debug('Failed to process performance datapoint: {}'.format(line))
                     data[feature] = lines
             except FileNotFoundError:
