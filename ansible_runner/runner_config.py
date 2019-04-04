@@ -207,7 +207,7 @@ class RunnerConfig(object):
         if self.process_isolation:
             self.command = self.wrap_args_with_process_isolation(self.command)
 
-        if self.resource_profiling:
+        if self.resource_profiling and self.execution_mode == ExecutionMode.ANSIBLE_PLAYBOOK:
             self.command = self.wrap_args_with_cgexec(self.command)
 
         if self.fact_cache_type == 'jsonfile':
@@ -395,7 +395,6 @@ class RunnerConfig(object):
         '''
         Wrap existing command line with cgexec in order to profile resource usage
         '''
-        # TODO: Should only wrap if `self.execution_mode == ExecutionMode.ANSIBLE_PLAYBOOK` (see example below)
         new_args = ['cgexec', '--sticky', '-g', 'cpuacct,memory,pids:{}/{}'.format(self.resource_profiling_base_cgroup, self.ident)]  # Is sticky needed?
         new_args.extend(args)
         return new_args
