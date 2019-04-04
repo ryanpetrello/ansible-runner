@@ -185,7 +185,7 @@ class RunnerConfig(object):
 
             if self.resource_profiling:
                 callback_whitelist = os.environ.get('ANSIBLE_CALLBACK_WHITELIST', '').strip()
-                self.env['ANSIBLE_CALLBACK_WHITELIST'] = callback_whitelist + (',' if len(callback_whitelist) else '') + 'cgroup_perf_recap'
+                self.env['ANSIBLE_CALLBACK_WHITELIST'] = ','.join(filter(None, [callback_whitelist, 'cgroup_perf_recap']))
                 self.env['CGROUP_CONTROL_GROUP'] = '{}/{}'.format(self.resource_profiling_base_cgroup, self.ident)
                 self.env['CGROUP_OUTPUT_DIR'] = self.private_data_dir + '/profiling_data'
                 self.env['CGROUP_FILE_NAME_FORMAT'] = '%(task_uuid)s-%(feature)s.%(ext)s'
