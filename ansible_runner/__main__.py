@@ -256,6 +256,9 @@ def main(sys_args=None):
     parser.add_argument("--resource-profiling-base-cgroup", dest='resource_profiling_base_cgroup', default="ansible-runner",
                         help="Top-level cgroup used to collect information on resource utilization")
 
+    parser.add_argument("--resource-profiling-cpu-poll-interval", dest='resource_profiling_cpu_poll_interval', default="0.25",
+                        help="Interval (in seconds) between CPU polling for determining CPU usage.")
+
     parser.add_argument("--limit",
                         help="Matches ansible's ``--limit`` parameter to further constrain the inventory to be used")
 
@@ -330,6 +333,7 @@ def main(sys_args=None):
                                    directory_isolation_base_path=args.directory_isolation_base_path,
                                    resource_profiling=args.resource_profiling,
                                    resource_profiling_base_cgroup=args.resource_profiling_base_cgroup,
+                                   resource_profiling_cpu_poll_interval=args.resource_profiling_cpu_poll_interval,
                                    limit=args.limit)
                 if args.cmdline:
                     run_options['cmdline'] = args.cmdline

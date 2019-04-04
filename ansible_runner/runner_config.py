@@ -79,7 +79,8 @@ class RunnerConfig(object):
                  rotate_artifacts=0, host_pattern=None, binary=None, extravars=None, suppress_ansible_output=False,
                  process_isolation=False, process_isolation_executable=None, process_isolation_path=None,
                  process_isolation_hide_paths=None, process_isolation_show_paths=None, process_isolation_ro_paths=None,
-                 resource_profiling=False, resource_profiling_base_cgroup='ansible_runner', tags=None, skip_tags=None, fact_cache_type='jsonfile', fact_cache=None,
+                 resource_profiling=False, resource_profiling_base_cgroup='ansible_runner', resource_profiling_cpu_poll_interval='0.25',
+                 tags=None, skip_tags=None, fact_cache_type='jsonfile', fact_cache=None,
                  project_dir=None, directory_isolation_base_path=None, envvars=None, forks=None):
         self.private_data_dir = os.path.abspath(private_data_dir)
         self.ident = ident
@@ -108,6 +109,7 @@ class RunnerConfig(object):
         self.process_isolation_ro_paths = process_isolation_ro_paths
         self.resource_profiling = resource_profiling
         self.resource_profiling_base_cgroup = resource_profiling_base_cgroup
+        self.resource_profiling_cpu_poll_interval = resource_profiling_cpu_poll_interval
         self.directory_isolation_path = directory_isolation_base_path
         if not project_dir:
             self.project_dir = os.path.join(self.private_data_dir, 'project')
@@ -190,7 +192,7 @@ class RunnerConfig(object):
                 self.env['CGROUP_OUTPUT_DIR'] = os.path.normpath(self.private_data_dir) + '/profiling_data'
                 self.env['CGROUP_FILE_NAME_FORMAT'] = '%(task_uuid)s-%(feature)s.%(ext)s'
                 self.env['CGROUP_OUTPUT_FORMAT'] = 'json'
-                self.env['CGROUP_CPU_POLL_INTERVAL'] = '0.25'  # TODO
+                self.env['CGROUP_CPU_POLL_INTERVAL'] = self.resource_profiling_cpu_poll_interval
                 self.env['CGROUP_FILE_PER_TASK'] = 'True'
                 self.env['CGROUP_WRITE_FILES'] = 'True'
                 self.env['CGROUP_DISPLAY_RECAP'] = 'False'  # TODO
