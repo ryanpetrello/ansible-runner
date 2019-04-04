@@ -254,10 +254,10 @@ def main(sys_args=None):
                         help="Records resource utilization during playbook execution")
 
     parser.add_argument("--resource-profiling-base-cgroup", dest='resource_profiling_base_cgroup', default="ansible-runner",
-                        help="Top-level cgroup used to collect information on resource utilization")
+                        help="Top-level cgroup used to collect information on resource utilization. Defaults to ansible-runner")
 
     parser.add_argument("--resource-profiling-cpu-poll-interval", dest='resource_profiling_cpu_poll_interval', default="0.25",
-                        help="Interval (in seconds) between CPU polling for determining CPU usage.")
+                        help="Interval (in seconds) between CPU polling for determining CPU usage. Defaults to '0.25'")
 
     parser.add_argument("--limit",
                         help="Matches ansible's ``--limit`` parameter to further constrain the inventory to be used")

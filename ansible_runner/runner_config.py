@@ -273,6 +273,9 @@ class RunnerConfig(object):
         self.process_isolation_hide_paths = self.settings.get('process_isolation_hide_paths', self.process_isolation_hide_paths)
         self.process_isolation_show_paths = self.settings.get('process_isolation_show_paths', self.process_isolation_show_paths)
         self.process_isolation_ro_paths = self.settings.get('process_isolation_ro_paths', self.process_isolation_ro_paths)
+        self.resource_profiling = self.settings.get('resource_profiling', self.resource_profiling)
+        self.resource_profiling_base_cgroup = self.settings.get('resource_profiling_base_cgroup', self.resource_profiling_base_cgroup)
+        self.resource_profiling_cpu_poll_interval = self.settings.get('resource_profiling_cpu_poll_interval', self.resource_profiling_cpu_poll_interval)
 
         self.pexpect_use_poll = self.settings.get('pexpect_use_poll', True)
         self.suppress_ansible_output = self.settings.get('suppress_ansible_output', self.quiet)
