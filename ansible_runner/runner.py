@@ -5,10 +5,11 @@ import time
 import json
 import errno
 import signal
-import subprocess
+from subprocess import Popen, PIPE
 import shutil
 import codecs
 import collections
+import logging
 
 import six
 import pexpect
@@ -19,6 +20,8 @@ import ansible_runner.plugins
 from .utils import OutputEventFilter, cleanup_artifact_dir
 from .exceptions import CallbackError, AnsibleRunnerException
 from ansible_runner.output import debug
+
+logger = logging.getLogger('ansible-runner')
 
 
 class Runner(object):
@@ -170,9 +173,11 @@ class Runner(object):
         if self.config.resource_profiling:
             cgroup_path = '{0}/{1}'.format(self.config.resource_profiling_base_cgroup, self.config.ident)
             cmd = 'cgcreate -g cpuacct,memory,pids:{}'.format(cgroup_path)
-            rc = subprocess.call(cmd, shell=True)
-            if rc:
+            proc = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+            _, stderr = proc.communicate()
+            if proc.returncode:
                 # Unable to create cgroup, disable profiling
+                logger.warning('Unable to create cgroup: {}'.format(stderr))
                 self.config.resource_profiling = False
 
         self.status_callback('running')
@@ -242,8 +247,11 @@ class Runner(object):
             shutil.rmtree(self.config.directory_isolation_path)
         if self.config.resource_profiling:
             cmd = ['cgdelete', '-g', 'cpuacct,memory,pids:ansible-runner-{}'.format(self.config.ident)]
-            proc = subprocess.Popen(cmd, shell=True)
-            proc.wait()
+            proc = Popen(cmd, stout=PIPE, stderr=PIPE, shell=True)
+            _, stderr = proc.communicate()
+            if proc.returncode:
+                logger.warning('Failed to delete cgroup: {}'.format(stderr))
+
         if self.finished_callback is not None:
             try:
                 self.finished_callback(self)
