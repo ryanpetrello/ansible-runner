@@ -46,7 +46,7 @@ class Runner(object):
             return {}
         task_uuid = event_data['event_data']['task_uuid']
         debug('Collecting profiling info for uuid {}'.format(task_uuid))
-        partial_path = cgroup_output_dir.decode("utf-8") + '/' + task_uuid  # right encoding?
+        partial_path = cgroup_output_dir + '/' + task_uuid
 
         data = {}
         for feature in ('cpu', 'memory', 'pids'):
@@ -247,7 +247,7 @@ class Runner(object):
             shutil.rmtree(self.config.directory_isolation_path)
         if self.config.resource_profiling:
             cmd = ['cgdelete', '-g', 'cpuacct,memory,pids:{}'.format(cgroup_path)]
-            proc = Popen(cmd, stout=PIPE, stderr=PIPE, shell=True)
+            proc = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
             _, stderr = proc.communicate()
             if proc.returncode:
                 logger.warning('Failed to delete cgroup: {}'.format(stderr))
