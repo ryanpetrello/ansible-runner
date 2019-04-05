@@ -79,7 +79,7 @@ class RunnerConfig(object):
                  rotate_artifacts=0, host_pattern=None, binary=None, extravars=None, suppress_ansible_output=False,
                  process_isolation=False, process_isolation_executable=None, process_isolation_path=None,
                  process_isolation_hide_paths=None, process_isolation_show_paths=None, process_isolation_ro_paths=None,
-                 resource_profiling=False, resource_profiling_base_cgroup='ansible_runner', resource_profiling_cpu_poll_interval='0.25',
+                 resource_profiling=False, resource_profiling_base_cgroup='ansible-runner', resource_profiling_cpu_poll_interval='0.25',
                  tags=None, skip_tags=None, fact_cache_type='jsonfile', fact_cache=None,
                  project_dir=None, directory_isolation_base_path=None, envvars=None, forks=None):
         self.private_data_dir = os.path.abspath(private_data_dir)

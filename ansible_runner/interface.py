@@ -120,7 +120,7 @@ def run(**kwargs):
     :param process_isolation_show_paths: A path or list of paths on the system that should be exposed to the playbook run.
     :param process_isolation_ro_paths: A path or list of paths on the system that should be exposed to the playbook run as read-only.
     :param resource_profiling: Enable collection of resource utilization data during playbook execution.
-    :param resource_profiling_base_cgroup: Name of an existing cgroup which can be sub-grouped in order to measure resource utilization (default: ansible-runner)
+    :param resource_profiling_base_cgroup: Name of existing cgroup which will be sub-grouped in order to measure resource utilization (default: ansible-runner)
     :param resource_profiling_cpu_poll_interval: Interval (in seconds) between CPU polling for determining CPU usage (default:  '0.25')
     :param directory_isolation_base_path: An optional path will be used as the base path to create a temp directory, the project contents will be
                                           copied to this location which will then be used as the working directory during playbook execution.
