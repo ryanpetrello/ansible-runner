@@ -85,6 +85,64 @@ list of arguments accepted by ``ansible-runner``::
 
   $ ansible-runner --help
 
+Running with Playbook Profiling
+-------------------------------
+
+**Runner** supports profiling CPU, memory, and PID usage of playbooks starting in Ansible 2.8 using the `cgroup_perf_recap` plugin.
+You can enable process isolation by providing the ``--resource-profiling`` and ``--resource-profiling-base-cgroup`` arguments on the command line::
+
+  $ sudo cgcreate -a `whoami` -t `whoami` -g cpuacct,memory,pids:ansible-runner
+  $ ansible-runner --resource-profiling --resource-profiling-base-cgroup=ansible-runner ...
+
+**Runner** also supports various profiling parameters that allow you to specify the interval (in seconds) at which CPU, Memory, and PID metadata is captured.
+Each of these parameters default to .25s::
+
+  $ ansible-runner --resource-profiling --resource-profiling-base-cgroup=ansible-runner \
+    --resource-profiling-cpu-poll-interval=.25 \
+    --resource-profiling-memory-poll-interval=.25 \
+    --resource-profiling-pid-poll-interval=.25 ...
+
+When profiling is enabled, profiling data is provided in an additional key in `runner_on_ok` and `runner_on_failed` events::
+
+  $ cat /path/to/dir/artifacts/N/job_events/UUID.json | python -m json.tool
+        ...
+        "profiling_data": {
+            'cpu': [{'task_name': 'debug',
+              'task_uuid': '0242ac12-0002-ea0c-e477-000000000008',
+              'timestamp': 1554822116.767719,
+              'value': 63.70492479744018},
+             {'task_name': 'debug',
+              'task_uuid': '0242ac12-0002-ea0c-e477-000000000008',
+              'timestamp': 1554822117.018691,
+              'value': 56.00494743179291}],
+            'memory': [{'task_name': 'debug',
+              'task_uuid': '0242ac12-0002-ea0c-e477-000000000008',
+              'timestamp': 1554822116.51313,
+              'value': 49.32421875},
+             {'task_name': 'debug',
+              'task_uuid': '0242ac12-0002-ea0c-e477-000000000008',
+              'timestamp': 1554822116.764662,
+              'value': 59.51171875},
+             {'task_name': 'debug',
+              'task_uuid': '0242ac12-0002-ea0c-e477-000000000008',
+              'timestamp': 1554822117.015138,
+              'value': 60.4296875}],
+            'pids': [{'task_name': 'debug',
+              'task_uuid': '0242ac12-0002-ea0c-e477-000000000008',
+              'timestamp': 1554822116.519186,
+              'value': 7},
+             {'task_name': 'debug',
+              'task_uuid': '0242ac12-0002-ea0c-e477-000000000008',
+              'timestamp': 1554822116.769594,
+              'value': 9},
+             {'task_name': 'debug',
+              'task_uuid': '0242ac12-0002-ea0c-e477-000000000008',
+              'timestamp': 1554822117.019996,
+              'value': 9}]
+        }
+        "stdout": "ok: [localhost] => {\r\n    \"msg\": \"test\"\r\n}",
+    }
+
 Running with Directory Isolation
 --------------------------------
 
