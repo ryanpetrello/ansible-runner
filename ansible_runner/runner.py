@@ -90,7 +90,10 @@ class Runner(object):
                     event_data.update(partial_event_data)
 
                     event = event_data.get('event', '')
-                    if self.config.resource_profiling and (event == 'runner_on_ok' or event == 'runner_on_failed'):
+                    if self.config.resource_profiling and event in (
+                        'runner_on_ok','runner_on_failed',
+                        'runner_on_item_ok', 'runner_on_item_failed',
+                    ):
                         self._collect_profiling_data(event_data)
 
                     if self.remove_partials:
