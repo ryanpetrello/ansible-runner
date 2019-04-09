@@ -122,6 +122,8 @@ def run(**kwargs):
     :param resource_profiling: Enable collection of resource utilization data during playbook execution.
     :param resource_profiling_base_cgroup: Name of existing cgroup which will be sub-grouped in order to measure resource utilization (default: ansible-runner)
     :param resource_profiling_cpu_poll_interval: Interval (in seconds) between CPU polling for determining CPU usage (default:  '0.25')
+    :param resource_profiling_memory_poll_interval: Interval (in seconds) between memory polling for determining memorny usage (default:  '0.25')
+    :param resource_profiling_pid_poll_interval: Interval (in seconds) between PID polling for determining PID usage (default:  '0.25')
     :param directory_isolation_base_path: An optional path will be used as the base path to create a temp directory, the project contents will be
                                           copied to this location which will then be used as the working directory during playbook execution.
     :param fact_cache: A string that will be used as the name for the subdirectory of the fact cache in artifacts directory.

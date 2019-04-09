@@ -258,6 +258,10 @@ def main(sys_args=None):
 
     parser.add_argument("--resource-profiling-cpu-poll-interval", dest='resource_profiling_cpu_poll_interval', default="0.25",
                         help="Interval (in seconds) between CPU polling for determining CPU usage. Defaults to '0.25'")
+    parser.add_argument("--resource-profiling-memory-poll-interval", dest='resource_profiling_memory_poll_interval', default="0.25",
+                        help="Interval (in seconds) between memory polling for determining memory usage. Defaults to '0.25'")
+    parser.add_argument("--resource-profiling-pid-poll-interval", dest='resource_profiling_pid_poll_interval', default="0.25",
+                        help="Interval (in seconds) between PID polling for determining PID usage. Defaults to '0.25'")
 
     parser.add_argument("--limit",
                         help="Matches ansible's ``--limit`` parameter to further constrain the inventory to be used")

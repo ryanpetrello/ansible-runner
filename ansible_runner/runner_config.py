@@ -80,6 +80,7 @@ class RunnerConfig(object):
                  process_isolation=False, process_isolation_executable=None, process_isolation_path=None,
                  process_isolation_hide_paths=None, process_isolation_show_paths=None, process_isolation_ro_paths=None,
                  resource_profiling=False, resource_profiling_base_cgroup='ansible-runner', resource_profiling_cpu_poll_interval='0.25',
+                 resource_profiling_memory_poll_interval='0.25', resource_profiling_pid_poll_interval='0.25',
                  tags=None, skip_tags=None, fact_cache_type='jsonfile', fact_cache=None,
                  project_dir=None, directory_isolation_base_path=None, envvars=None, forks=None):
         self.private_data_dir = os.path.abspath(private_data_dir)
@@ -110,6 +111,8 @@ class RunnerConfig(object):
         self.resource_profiling = resource_profiling
         self.resource_profiling_base_cgroup = resource_profiling_base_cgroup
         self.resource_profiling_cpu_poll_interval = resource_profiling_cpu_poll_interval
+        self.resource_profiling_memory_poll_interval = resource_profiling_memory_poll_interval
+        self.resource_profiling_pid_poll_interval = resource_profiling_pid_poll_interval
         self.directory_isolation_path = directory_isolation_base_path
         if not project_dir:
             self.project_dir = os.path.join(self.private_data_dir, 'project')
@@ -193,6 +196,8 @@ class RunnerConfig(object):
                 self.env['CGROUP_FILE_NAME_FORMAT'] = '%(task_uuid)s-%(feature)s.%(ext)s'
                 self.env['CGROUP_OUTPUT_FORMAT'] = 'json'
                 self.env['CGROUP_CPU_POLL_INTERVAL'] = self.resource_profiling_cpu_poll_interval
+                self.env['CGROUP_MEMORY_POLL_INTERVAL'] = self.resource_profiling_memory_poll_interval
+                self.env['CGROUP_PID_POLL_INTERVAL'] = self.resource_profiling_pid_poll_interval
                 self.env['CGROUP_FILE_PER_TASK'] = 'True'
                 self.env['CGROUP_WRITE_FILES'] = 'True'
                 self.env['CGROUP_DISPLAY_RECAP'] = 'False'  # TODO
@@ -276,6 +281,8 @@ class RunnerConfig(object):
         self.resource_profiling = self.settings.get('resource_profiling', self.resource_profiling)
         self.resource_profiling_base_cgroup = self.settings.get('resource_profiling_base_cgroup', self.resource_profiling_base_cgroup)
         self.resource_profiling_cpu_poll_interval = self.settings.get('resource_profiling_cpu_poll_interval', self.resource_profiling_cpu_poll_interval)
+        self.resource_profiling_memory_poll_interval = self.settings.get('resource_profiling_memory_poll_interval', self.resource_profiling_memory_poll_interval)  # noqa
+        self.resource_profiling_pid_poll_interval = self.settings.get('resource_profiling_pid_poll_interval', self.resource_profiling_pid_poll_interval)
 
         self.pexpect_use_poll = self.settings.get('pexpect_use_poll', True)
         self.suppress_ansible_output = self.settings.get('suppress_ansible_output', self.quiet)
